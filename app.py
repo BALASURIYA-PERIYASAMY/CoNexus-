@@ -376,6 +376,107 @@ def delete_comment(comment_id):
     flash('Comment deleted!', 'success')
     return redirect(url_for('admin_comments'))
 
+# User dashboard and blog creation routes
+@app.route('/dashboard')
+@login_required
+def user_dashboard():
+    user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.created_at.desc()).all()
+    return render_template('user/dashboard.html', posts=user_posts)
+
+@app.route('/post/create', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        excerpt = request.form['excerpt']
+        category_id = request.form.get('category_id', type=int)
+        is_published = 'is_published' in request.form
+        
+        # Generate slug from title
+        slug = title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
+        
+        # Handle file upload
+        featured_image = None
+        if 'featured_image' in request.files:
+            file = request.files['featured_image']
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+                featured_image = f"uploads/{unique_filename}"
+        
+        post = Post(
+            title=title,
+            slug=slug,
+            content=content,
+            excerpt=excerpt,
+            featured_image=featured_image,
+            is_featured=False,  # Only admins can feature posts
+            is_published=is_published,
+            user_id=current_user.id,
+            category_id=category_id
+        )
+        
+        db.session.add(post)
+        db.session.commit()
+        flash('Post created successfully!', 'success')
+        return redirect(url_for('user_dashboard'))
+    
+    categories = Category.query.all()
+    return render_template('user/create_post.html', categories=categories)
+
+@app.route('/post/edit/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    
+    # Check if user owns this post or is admin
+    if post.user_id != current_user.id and not current_user.is_admin:
+        flash('Access denied', 'error')
+        return redirect(url_for('user_dashboard'))
+    
+    if request.method == 'POST':
+        post.title = request.form['title']
+        post.content = request.form['content']
+        post.excerpt = request.form['excerpt']
+        post.category_id = request.form.get('category_id', type=int)
+        post.is_published = 'is_published' in request.form
+        
+        # Generate new slug from title
+        post.slug = post.title.lower().replace(' ', '-').replace('?', '').replace('!', '').replace('.', '')
+        
+        # Handle file upload
+        if 'featured_image' in request.files:
+            file = request.files['featured_image']
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+                post.featured_image = f"uploads/{unique_filename}"
+        
+        db.session.commit()
+        flash('Post updated successfully!', 'success')
+        return redirect(url_for('user_dashboard'))
+    
+    categories = Category.query.all()
+    return render_template('user/edit_post.html', post=post, categories=categories)
+
+@app.route('/post/delete/<int:post_id>', methods=['POST'])
+@login_required
+def delete_user_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    
+    # Check if user owns this post or is admin
+    if post.user_id != current_user.id and not current_user.is_admin:
+        flash('Access denied', 'error')
+        return redirect(url_for('user_dashboard'))
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted successfully!', 'success')
+    return redirect(url_for('user_dashboard'))
+
 # API routes for AJAX
 @app.route('/api/toggle-theme', methods=['POST'])
 def toggle_theme():
