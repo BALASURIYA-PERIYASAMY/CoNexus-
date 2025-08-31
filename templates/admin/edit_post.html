@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Post - Admin{% endblock %}
+{% block description %}Edit blog post{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Edit Post</h1>
+                <p class="text-gray-600 dark:text-gray-400">Modify "{{ post.title }}"</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{{ url_for('admin_posts') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Posts
+                </a>
+                <a href="{{ url_for('post', slug=post.slug) }}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-eye mr-2"></i>View Post
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="py-8 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Post Title *
+                    </label>
+                    <input type="text" id="title" name="title" value="{{ post.title }}" required
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                           placeholder="Enter the post title">
+                </div>
+                
+                <!-- Category -->
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Category
+                    </label>
+                    <select id="category_id" name="category_id"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if post.category_id == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Current Featured Image -->
+                {% if post.featured_image %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Current Featured Image
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ url_for('static', filename=post.featured_image) }}" 
+                             alt="{{ post.title }}" 
+                             class="w-32 h-24 object-cover rounded-lg">
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ post.featured_image }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500">Upload a new image to replace this one</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Featured Image -->
+                <div>
+                    <label for="featured_image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {% if post.featured_image %}New Featured Image{% else %}Featured Image{% endif %}
+                    </label>
+                    <input type="file" id="featured_image" name="featured_image" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Recommended size: 1200x630 pixels. Max file size: 16MB.
+                    </p>
+                </div>
+                
+                <!-- Excerpt -->
+                <div>
+                    <label for="excerpt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Excerpt
+                    </label>
+                    <textarea id="excerpt" name="excerpt" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                              placeholder="A brief summary of the post (optional)">{{ post.excerpt or '' }}</textarea>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        This will appear in post previews and search results.
+                    </p>
+                </div>
+                
+                <!-- Content -->
+                <div>
+                    <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Content *
+                    </label>
+                    <textarea id="content" name="content" rows="15" required
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                              placeholder="Write your blog post content here...">{{ post.content }}</textarea>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        You can use HTML tags for formatting. Basic tags like &lt;h1&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt; are supported.
+                    </p>
+                </div>
+                
+                <!-- Options -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Post Options</h3>
+                    
+                    <div class="flex items-center">
+                        <input id="is_published" name="is_published" type="checkbox" {% if post.is_published %}checked{% endif %}
+                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        <label for="is_published" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                            Publish post
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input id="is_featured" name="is_featured" type="checkbox" {% if post.is_featured %}checked{% endif %}
+                               class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        <label for="is_featured" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                            Mark as featured post
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Post Stats -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Post Statistics</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Views</p>
+                            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ post.views }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Comments</p>
+                            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ post.comments|length }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Created</p>
+                            <p class="text-sm text-gray-900 dark:text-white">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Updated</p>
+                            <p class="text-sm text-gray-900 dark:text-white">{{ post.updated_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-600">
+                    <a href="{{ url_for('admin_posts') }}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-save mr-2"></i>Update Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-resize textarea
+    const contentTextarea = document.getElementById('content');
+    contentTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+    
+    // Character counter for excerpt
+    const excerptTextarea = document.getElementById('excerpt');
+    const excerptCounter = document.createElement('div');
+    excerptCounter.className = 'mt-1 text-sm text-gray-500 dark:text-gray-400';
+    excerptTextarea.parentNode.appendChild(excerptCounter);
+    
+    function updateExcerptCounter() {
+        const remaining = 300 - excerptTextarea.value.length;
+        excerptCounter.textContent = `${remaining} characters remaining`;
+        
+        if (remaining < 0) {
+            excerptCounter.classList.add('text-red-500');
+        } else {
+            excerptCounter.classList.remove('text-red-500');
+        }
+    }
+    
+    excerptTextarea.addEventListener('input', updateExcerptCounter);
+    updateExcerptCounter(); // Initialize counter
+</script>
+{% endblock %}
