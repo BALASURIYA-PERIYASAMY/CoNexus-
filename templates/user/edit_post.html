@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Post - CoNexus{% endblock %}
+{% block description %}Edit your blog post{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white dark:bg-gray-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Edit Post</h1>
+                <p class="text-gray-600 dark:text-gray-400">Update your blog post</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{{ url_for('user_dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Post Form -->
+<section class="py-8 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Post Title *
+                    </label>
+                    <input type="text" id="title" name="title" value="{{ post.title }}" required
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                           placeholder="Enter your post title">
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Category
+                    </label>
+                    <select id="category_id" name="category_id"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if post.category_id == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Current Featured Image -->
+                {% if post.featured_image %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Current Featured Image
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ url_for('static', filename=post.featured_image) }}" 
+                             alt="{{ post.title }}" 
+                             class="w-32 h-24 object-cover rounded-lg">
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Current image</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500">{{ post.featured_image.split('/')[-1] }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- New Featured Image -->
+                <div>
+                    <label for="featured_image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        New Featured Image (optional)
+                    </label>
+                    <input type="file" id="featured_image" name="featured_image" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Upload a new image to replace the current one
+                    </p>
+                </div>
+
+                <!-- Excerpt -->
+                <div>
+                    <label for="excerpt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Excerpt
+                    </label>
+                    <textarea id="excerpt" name="excerpt" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                              placeholder="Write a brief summary of your post (optional)">{{ post.excerpt or '' }}</textarea>
+                    <div class="mt-1 flex justify-between">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            A short preview that appears in post listings
+                        </p>
+                        <span id="excerpt-count" class="text-sm text-gray-500 dark:text-gray-400">0/200</span>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div>
+                    <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Post Content *
+                    </label>
+                    <textarea id="content" name="content" rows="15" required
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                              placeholder="Write your blog post content here...">{{ post.content }}</textarea>
+                </div>
+
+                <!-- Publishing Options -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Publishing Options</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input id="is_published" name="is_published" type="checkbox" {% if post.is_published %}checked{% endif %}
+                                   class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            <label for="is_published" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                                Publish immediately
+                            </label>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            If unchecked, your post will be saved as a draft
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Post Statistics -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100 mb-4">Post Statistics</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ post.views }}</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Views</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ post.comments|length }}</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Comments</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ post.created_at.strftime('%b %d') }}</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Created</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ post.updated_at.strftime('%b %d') if post.updated_at else 'N/A' }}</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Updated</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between space-x-4 pt-6 border-t border-gray-200 dark:border-gray-600">
+                    <div class="flex space-x-4">
+                        <a href="{{ url_for('post', slug=post.slug) }}"
+                           class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-eye mr-2"></i>View Post
+                        </a>
+                        <a href="{{ url_for('user_dashboard') }}"
+                           class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            Cancel
+                        </a>
+                    </div>
+                    <button type="submit"
+                            class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-save mr-2"></i>Update Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Auto-resize textarea
+    const contentTextarea = document.getElementById('content');
+    contentTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Excerpt character counter
+    const excerptTextarea = document.getElementById('excerpt');
+    const excerptCount = document.getElementById('excerpt-count');
+    
+    function updateExcerptCount() {
+        const count = excerptTextarea.value.length;
+        excerptCount.textContent = `${count}/200`;
+        
+        if (count > 200) {
+            excerptCount.classList.add('text-red-500');
+        } else {
+            excerptCount.classList.remove('text-red-500');
+        }
+    }
+    
+    excerptTextarea.addEventListener('input', updateExcerptCount);
+    updateExcerptCount(); // Initialize count on page load
+</script>
+{% endblock %}

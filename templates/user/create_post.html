@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Post - CoNexus{% endblock %}
+{% block description %}Write and publish your blog post{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white dark:bg-gray-800 shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Create New Post</h1>
+                <p class="text-gray-600 dark:text-gray-400">Share your thoughts with the world</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{{ url_for('user_dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Post Form -->
+<section class="py-8 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Post Title *
+                    </label>
+                    <input type="text" id="title" name="title" required
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                           placeholder="Enter your post title">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Choose a compelling title that will attract readers
+                    </p>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Category
+                    </label>
+                    <select id="category_id" name="category_id"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Featured Image -->
+                <div>
+                    <label for="featured_image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Featured Image
+                    </label>
+                    <input type="file" id="featured_image" name="featured_image" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Upload an image to make your post more engaging (optional)
+                    </p>
+                </div>
+
+                <!-- Excerpt -->
+                <div>
+                    <label for="excerpt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Excerpt
+                    </label>
+                    <textarea id="excerpt" name="excerpt" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                              placeholder="Write a brief summary of your post (optional)"></textarea>
+                    <div class="mt-1 flex justify-between">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            A short preview that appears in post listings
+                        </p>
+                        <span id="excerpt-count" class="text-sm text-gray-500 dark:text-gray-400">0/200</span>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div>
+                    <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Post Content *
+                    </label>
+                    <textarea id="content" name="content" rows="15" required
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                              placeholder="Write your blog post content here..."></textarea>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        You can use basic HTML tags like &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, etc.
+                    </p>
+                </div>
+
+                <!-- Publishing Options -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Publishing Options</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input id="is_published" name="is_published" type="checkbox"
+                                   class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            <label for="is_published" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                                Publish immediately
+                            </label>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            If unchecked, your post will be saved as a draft
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-600">
+                    <a href="{{ url_for('user_dashboard') }}"
+                       class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Writing Tips -->
+<section class="py-8 bg-white dark:bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Writing Tips</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Content Guidelines</h3>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <li>• Write engaging, original content</li>
+                    <li>• Use clear headings and paragraphs</li>
+                    <li>• Include relevant images when possible</li>
+                    <li>• Keep your audience in mind</li>
+                    <li>• Proofread before publishing</li>
+                </ul>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">HTML Tips</h3>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <li>• <code>&lt;strong&gt;</code> for <strong>bold text</strong></li>
+                    <li>• <code>&lt;em&gt;</code> for <em>italic text</em></li>
+                    <li>• <code>&lt;br&gt;</code> for line breaks</li>
+                    <li>• <code>&lt;h2&gt;</code> for section headings</li>
+                    <li>• <code>&lt;ul&gt;</code> and <code>&lt;li&gt;</code> for lists</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Auto-resize textarea
+    const contentTextarea = document.getElementById('content');
+    contentTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Excerpt character counter
+    const excerptTextarea = document.getElementById('excerpt');
+    const excerptCount = document.getElementById('excerpt-count');
+    
+    excerptTextarea.addEventListener('input', function() {
+        const count = this.value.length;
+        excerptCount.textContent = `${count}/200`;
+        
+        if (count > 200) {
+            excerptCount.classList.add('text-red-500');
+        } else {
+            excerptCount.classList.remove('text-red-500');
+        }
+    });
+
+    // Auto-save draft (optional feature)
+    let autoSaveTimer;
+    contentTextarea.addEventListener('input', function() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            // You could implement auto-save functionality here
+            console.log('Auto-saving draft...');
+        }, 30000); // Auto-save every 30 seconds
+    });
+</script>
+{% endblock %}
